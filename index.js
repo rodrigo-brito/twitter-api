@@ -10,13 +10,15 @@ var client = new Twitter({
 	access_token_secret: config.keys.access_token_secret
 });
 
-
+var trimEndline = function(text){
+	return text.replace(/\r?\n|\r/g, " ");
+};
 
 var getTimelineTwitter = function(screen_name, max_id, count, callback){
 	var params = {
 		screen_name: screen_name,
 		count: count,
-		exclude_replies: true,
+		exclude_replies: false,
 		include_rts: true,
 		trim_user: true,
 		contributor_details: false
@@ -27,25 +29,35 @@ var getTimelineTwitter = function(screen_name, max_id, count, callback){
 	client.get('statuses/user_timeline', params, function(error, tweets, response){
 		if(!error){
 			tweets.forEach(function(tt){
-				console.log(tt.id_str+' : '+tt.text);
+				console.log(tt.id_str+' : '+trimEndline(tt.text) );
 			});
 			if(callback){
-				callback(null, tweets[ tweets.length - 1 ].id_str);
+				if(tweets.length > 0){
+					var id = bigInt(tweets[ tweets.length - 1 ].id_str);
+					var next_id = id.minus(1); //Necessário reduzir em uma unidade o id para não incluir o último retornado
+					callback(null, next_id.toString());
+				}else{
+					callback(null, null); //Null simboliza que não há mais twitts
+				}
 			}
 		}else{
 			console.log("ERRO: ");
 			console.log(error);
 			if(callback){
-				callback(true);
+				callback(error, max_id);//Retorna o último id antes do erro
 			}
 		}
 	});
 };
 
-getTimelineTwitter('g1', null, 5, function(err, last_id){
+var user_name = "RodrigoFBrito";
+var count = 200;
+getTimelineTwitter(user_name, null, count, function callback(err, last_id){
 	if(!err){
-		var id = bigInt(last_id);
-		var next_id = id.minus(1); //Necessário reduzir em uma unidade o id para não incluir o último retornado
-		getTimelineTwitter('g1', next_id.toString(), 5);
+		if(last_id != null){
+			getTimelineTwitter(user_name, last_id, count, callback);
+		}
+	}else{
+		getTimelineTwitter(user_name, last_id, count, callback);
 	}
 });
