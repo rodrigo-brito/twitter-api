@@ -10,6 +10,7 @@
   "license": "GPL",
   "devDependencies": {
     "big-integer": "^1.6.13",
+    "mongodb": "^2.1.16",
     "twitter": "^1.2.5"
   }
 }
