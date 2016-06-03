@@ -70,7 +70,7 @@ var getTimelineTwitter = function(screen_name, max_id, count, callback){
 		screen_name: screen_name,
 		count: count,
 		exclude_replies: false,
-		include_rts: false,
+		include_rts: true,
 		trim_user: true,
 		contributor_details: false
 	};
